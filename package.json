@@ -1,7 +1,7 @@
 {
   "name": "solar-black",
   "version": "1.0.0",
-  "description": "",
+  "description": "太阳黑子聚合观察，提供简单的API，方便第三方看板接入",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -17,5 +17,13 @@
     "express": "^5.2.1",
     "node-cron": "^4.2.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wolfpan/sunspot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wolfpan/sunspot/issues"
+  },
+  "homepage": "https://github.com/wolfpan/sunspot#readme",
   "devDependencies": {}
 }
