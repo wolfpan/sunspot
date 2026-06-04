@@ -95,22 +95,17 @@
       display: flex;
       align-items: center;
     }
-    .ai-analysis h3::before {
-      content: '✦';
-      margin-right: 8px;
-      font-size: 1.1rem;
-    }
+    .ai-analysis h3::before { content: '✦'; margin-right: 8px; font-size: 1.1rem; }
+    
     .ai-content {
-      font-size: 0.95rem;
+      font-size: 0.95rem; /* 强制统一全局字号 */
       color: var(--gray);
-      line-height: 1.6;
+      line-height: 1.8;
       white-space: pre-wrap; 
     }
-    .ai-content strong { color: var(--fg); }
-    .pulse-text { animation: pulse 1.5s infinite; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+    .ai-content strong { 
+      font-weight: 500; /* 使用中等字重，拒绝粗暴的黑体 */
+      color: var(--fg); 
     }
 
     /* 科普区样式 */
@@ -307,6 +302,7 @@
       }
 
       // 拉取 AI 推理结果的专用函数
+      // 拉取 AI 推理结果的专用函数 (加入防假死轮询机制)
       async function fetchAiAnalysis() {
         try {
             const aiResp = await fetch('/api/v1/solar/analysis');
@@ -315,21 +311,29 @@
             if (aiResult.status === 'success') {
                 let formattedText = aiResult.data;
                 
-                // 正则捕获五大指标的冒号前缀，自动加粗标签
-                formattedText = formattedText.replace(/^(地球磁层|极光可见度|低轨卫星阻力|通信与网络|微型电子设备)：/gm, '<strong>$1：</strong>');
+                // 核心修复：如果后端的大模型还在思考中，前端触发轮询等待，避免页面假死
+                if (formattedText === "等待核心数据注入与模型推理...") {
+                    aiContentEl.innerHTML = '<span class="pulse-text">等待核心数据注入与模型推理...</span>';
+                    setTimeout(fetchAiAnalysis, 2000); // 2秒后重新查询
+                    return; // 退出当前循环，等待下次查询
+                }
                 
-                // 突出底部的综合指数，拉开视觉层次
+                // 捕获换行标题并加中等字重
+                // 捕获极简版的两行核心标题并加中等字重
+                formattedText = formattedText.replace(/^(观测现象|环境影响)：/gm, '<strong>$1：</strong>');
+                
+                // 用虚线块将综合指数包裹起来，视觉上彻底独立
                 formattedText = formattedText.replace(
                     /(综合太阳风暴指数：\s*)(\d+)/, 
-                    '<br><br><strong style="font-size: 1.15rem; color: var(--fg); border-top: 1px solid var(--border); padding-top: 12px; display: inline-block;">$1 $2 / 10</strong>'
+                    '<div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);"><strong>$1 $2 / 10</strong></div>'
                 );
                 
                 aiContentEl.innerHTML = formattedText;
             } else {
-                aiContentEl.innerHTML = 'GLM 大模型响应异常。';
+                aiContentEl.innerHTML = '获取态势感知数据失败。';
             }
         } catch (err) {
-            aiContentEl.innerHTML = '推理服务连接超时。';
+            aiContentEl.innerHTML = '本地网络连接超时。';
         }
       }
     });
