@@ -11,6 +11,7 @@
       --gray: #666666;
       --light-gray: #a0a0a0;
       --border: #eaeaea;
+      --accent-bg: #f9f9f9;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -24,7 +25,7 @@
     }
     .container {
       width: 100%;
-      max-width: 800px; /* 加宽容器以容纳更多列 */
+      max-width: 800px;
     }
     header {
       margin-bottom: 40px;
@@ -68,86 +69,63 @@
       padding: 16px 8px;
       border-bottom: 1px solid var(--border);
     }
-    th {
-      font-weight: 500;
-      color: var(--gray);
-      font-size: 0.85rem;
-    }
-    /* 第一列机构靠左，最后一列日期靠右，中间数值居中 */
+    th { font-weight: 500; color: var(--gray); font-size: 0.85rem; }
     th:first-child, td:first-child { text-align: left; padding-left: 0; }
     th:last-child, td:last-child { text-align: right; padding-right: 0; }
     th.center, td.center { text-align: center; }
     
     td.agency { font-weight: 600; }
-    td.value {
+    td.value { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1.1rem; }
+    td.date { color: var(--gray); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.85rem; }
+    .empty-cell { color: var(--border); font-weight: 300; }
+
+    /* AI 态势分析区样式 */
+    .ai-analysis {
+      margin-top: 40px;
+      padding: 24px 24px 24px 20px;
+      background-color: var(--accent-bg);
+      border-left: 3px solid var(--fg);
+      border-radius: 0 8px 8px 0;
+    }
+    .ai-analysis h3 {
+      font-size: 0.95rem;
+      color: var(--fg);
       font-weight: 600;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      margin: 0 0 12px 0;
+      display: flex;
+      align-items: center;
+    }
+    .ai-analysis h3::before {
+      content: '✦';
+      margin-right: 8px;
       font-size: 1.1rem;
     }
-    td.date {
+    .ai-content {
+      font-size: 0.95rem;
       color: var(--gray);
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap; 
     }
-    .empty-cell {
-      color: var(--border);
-      font-weight: 300;
+    .ai-content strong { color: var(--fg); }
+    .pulse-text { animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
     }
 
     /* 科普区样式 */
-    .glossary {
-      margin-top: 60px;
-      padding-top: 30px;
-      border-top: 1px dashed var(--border);
-    }
-    .glossary h3 {
-      font-size: 0.95rem;
-      color: var(--gray);
-      font-weight: 600;
-      margin-bottom: 24px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+    .glossary { margin-top: 60px; padding-top: 30px; border-top: 1px dashed var(--border); }
+    .glossary h3 { font-size: 0.95rem; color: var(--gray); font-weight: 600; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em; }
     .term-block { margin-bottom: 30px; }
     .term-block h4 { font-size: 1rem; margin: 0 0 8px 0; color: var(--fg); }
     .term-block p { font-size: 0.9rem; color: var(--gray); margin: 0 0 12px 0; }
     .term-block ul { margin: 0; padding-left: 0; list-style: none; }
-    .term-block li {
-      font-size: 0.85rem;
-      color: var(--fg);
-      margin-bottom: 6px;
-      padding-left: 12px;
-      border-left: 2px solid var(--border);
-    }
-    .term-block .range {
-      display: inline-block;
-      width: 70px;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      color: var(--gray);
-    }
-    /* 代码块与行内代码样式 */
-    code {
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      background-color: #f5f5f5;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-    }
-    pre {
-      background-color: #fcfcfc;
-      border: 1px solid var(--border);
-      padding: 16px;
-      border-radius: 6px;
-      overflow-x: auto;
-      font-size: 0.85rem;
-      color: var(--gray);
-      line-height: 1.4;
-      margin-top: 16px;
-    }
-    pre code {
-      background-color: transparent;
-      padding: 0;
-    }
+    .term-block li { font-size: 0.85rem; color: var(--fg); margin-bottom: 6px; padding-left: 12px; border-left: 2px solid var(--border); }
+    .term-block .range { display: inline-block; width: 70px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--gray); }
+    
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; background-color: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+    pre { background-color: #fcfcfc; border: 1px solid var(--border); padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; color: var(--gray); line-height: 1.4; margin-top: 16px; }
+    pre code { background-color: transparent; padding: 0; }
   </style>
 </head>
 <body>
@@ -169,13 +147,19 @@
           </tr>
         </thead>
         <tbody id="data-body">
-          <tr><td colspan="5" style="text-align: left; color: var(--gray);">拉取数据中...</td></tr>
+          <tr><td colspan="5" style="text-align: left; color: var(--gray);">拉取核心指标中...</td></tr>
         </tbody>
       </table>
 
+      <section class="ai-analysis" id="ai-section">
+        <h3>AI 空间天气态势感知</h3>
+        <div class="ai-content" id="ai-content">
+          <span class="pulse-text">正在通过 GLM-4 模型计算行星级环境影响...</span>
+        </div>
+      </section>
+
       <section class="glossary">
         <h3>观测指标与影响范围基准</h3>
-        
         <div class="term-block">
           <h4>太阳黑子数 (SSN: Sunspot Number)</h4>
           <p>反映太阳表面磁场活跃程度的核心“源头”指标。数值越高，引发耀斑和日冕物质抛射（CME）的概率越大。</p>
@@ -185,17 +169,15 @@
             <li><span class="range">> 150</span> <b>极度活跃</b>：高能粒子爆发频次剧增，极易引发空间天气灾害。</li>
           </ul>
         </div>
-
         <div class="term-block">
           <h4>F10.7 厘米射电流量 (Solar Radio Flux)</h4>
           <p>衡量太阳高层大气整体活跃度的硬指标，由 ESA/SIDC 等机构高频监测。它与黑子数高度正相关，是几乎所有近地卫星“轨道衰变模型”的核心输入参数。</p>
           <ul>
             <li><span class="range">< 100</span> <b>太阳平静</b>：卫星运行阻力小，轨道寿命长。</li>
             <li><span class="range">100 - 150</span> <b>中等活跃</b>：紫外线辐射增强，地球高层大气受热膨胀。</li>
-            <li><span class="range">> 150</span> <b>高度活跃</b>：低轨卫星（如星链、空间站）面临极大的大气阻力，需要频繁消耗燃料抬升轨道。</li>
+            <li><span class="range">> 150</span> <b>高度活跃</b>：低轨卫星面临极大的大气阻力，需要频繁消耗燃料抬升轨道。</li>
           </ul>
         </div>
-
         <div class="term-block">
           <h4>地磁 Kp 指数 (Geomagnetic Kp Index)</h4>
           <p>衡量太阳高能粒子流对地球磁场造成实际“物理冲击”的量化指标，范围 0 - 9，呈对数级增长。</p>
@@ -207,24 +189,21 @@
           </ul>
         </div>
       </section>
+
       <section class="glossary">
         <h3>数据来源机构说明</h3>
-        
         <div class="term-block">
           <h4>NOAA (美国国家海洋和大气管理局)</h4>
           <p>全球最主要的空间天气预报中心（SWPC），提供综合性的太阳射电流量、黑子数及地磁观测的实时预警数据。</p>
         </div>
-        
         <div class="term-block">
           <h4>SILSO (世界黑子数据中心)</h4>
           <p>位于比利时皇家天文台，是国际公认的太阳黑子数（Sunspot Number）基准维护与发布机构，负责整合全球天文台的观测网络。</p>
         </div>
-        
         <div class="term-block">
           <h4>ESA_SIDC (欧洲空间局太阳天气服务中心)</h4>
           <p>依托于比利时天文台运行，发布权威的每日 URSIGRAM 空间天气公报，是欧洲空间局各项近地轨道卫星任务的重要数据基准。</p>
         </div>
-        
         <div class="term-block">
           <h4>GFZ_POTSDAM (德国地学研究中心)</h4>
           <p>由国际地磁学与高空物理学协会（IAGA）官方授权，是全球地磁 Kp 指数的唯一核心计算与发布中心，汇聚全球南北半球的测站网络。</p>
@@ -233,28 +212,17 @@
 
       <section class="glossary">
         <h3>开发者 API 接入</h3>
-        
         <div class="term-block">
-          <p>本系统提供极简的 RESTful API，供第三方看板、自动化脚本或物联网设备直接调用最新聚合数据。</p>
+          <p>本系统提供极简的 RESTful API，供第三方看板、自动化脚本或物联网设备直接调用最新聚合数据与态势分析。</p>
           <ul>
-            <li><strong>请求节点:</strong> <code>GET /api/v1/solar/sunspots</code></li>
+            <li><strong>核心数据节点:</strong> <code>GET /api/v1/solar/sunspots</code></li>
+            <li><strong>AI 分析节点:</strong> <code>GET /api/v1/solar/analysis</code></li>
             <li><strong>数据格式:</strong> <code>application/json</code></li>
-            <li><strong>跨域支持:</strong> 默认允许同源，可根据需求在服务端配置 CORS。</li>
           </ul>
-          
-          <pre><code>// 成功响应示例
+          <pre><code>// 态势分析 API 响应示例
 {
   "status": "success",
-  "update_time": "2026-06-04T10:00:00.000Z",
-  "data": [
-    {
-      "agency": "NOAA",
-      "metric": "kp_index",
-      "value": 2.33,
-      "record_time": "2026-06-04T00:00:00.000Z"
-    },
-    // ... 包含所有机构最新指标的数组
-  ]
+  "data": "当前F10.7射电流量为149，太阳磁场中等活跃。高层大气遇热膨胀，增加低轨卫星阻力。Kp指数0.33说明地磁平静，高纬度无明显极光，全球手机基站、GPS及短波通信网络运行稳定。医疗级起搏器等微型电子设备不受空间辐射电磁场干扰。\n\n综合太阳风暴指数：2"
 }</code></pre>
         </div>
       </section>
@@ -265,10 +233,11 @@
   document.addEventListener("DOMContentLoaded", async () => {
       const tbody = document.getElementById('data-body');
       const statusEl = document.getElementById('system-status'); 
-
-// 预期获得的总数据指标数量 (NOAA有3个, SILSO 1个, ESA 1个, GFZ 1个，共6个)
+      const aiContentEl = document.getElementById('ai-content');
+      
       const expectedMetricsCount = 6;
 
+      // 1. 获取核心数值矩阵
       try {
         const response = await fetch('/api/v1/solar/sunspots');
         const result = await response.json();
@@ -276,7 +245,6 @@
         if (result.status === 'success' && result.data.length > 0) {
           tbody.innerHTML = ''; 
           
-          // 状态灯判断逻辑
           if (result.data.length >= expectedMetricsCount) {
             statusEl.className = 'status green';
             statusEl.textContent = 'System Online';
@@ -285,7 +253,6 @@
             statusEl.textContent = `Partial Data (${result.data.length}/${expectedMetricsCount})`;
           }
           
-          // --- 核心改动：按“机构”进行数据透视 (Data Pivoting) ---
           const pivotData = {};
           
           result.data.forEach(item => {
@@ -305,14 +272,12 @@
             if (item.metric === 'sunspot_number') pivotData[item.agency].ssn = item.value;
             if (item.metric === 'f107_flux') pivotData[item.agency].f107 = item.value;
             
-            // 核心修复：强制格式化 Kp 指数。GFZ 规范为 3 位小数，NOAA 规范为 2 位小数
             if (item.metric === 'kp_index') {
                 const decimals = item.agency === 'GFZ_POTSDAM' ? 3 : 2;
                 pivotData[item.agency].kp = Number(item.value).toFixed(decimals);
             }
           });
 
-          // 遍历透视后的对象，生成 HTML 表格行
           Object.values(pivotData).forEach(row => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -324,16 +289,48 @@
             `;
             tbody.appendChild(tr);
           });
+          
+          // 2. 核心数据加载完成后，异步请求 AI 态势感知
+          fetchAiAnalysis();
 
         } else {
           statusEl.className = 'status red';
           statusEl.textContent = 'No Data';
           tbody.innerHTML = '<tr><td colspan="5">暂无数据记录，请等待服务器抓取。</td></tr>';
+          aiContentEl.innerHTML = '等待核心数据注入...';
         }
       } catch (error) {
         statusEl.className = 'status red';
         statusEl.textContent = 'System Offline';
         tbody.innerHTML = '<tr><td colspan="5">API 连接异常。</td></tr>';
+        aiContentEl.innerHTML = '本地服务掉线，无法请求模型推理。';
+      }
+
+      // 拉取 AI 推理结果的专用函数
+      async function fetchAiAnalysis() {
+        try {
+            const aiResp = await fetch('/api/v1/solar/analysis');
+            const aiResult = await aiResp.json();
+            
+            if (aiResult.status === 'success') {
+                let formattedText = aiResult.data;
+                
+                // 正则捕获五大指标的冒号前缀，自动加粗标签
+                formattedText = formattedText.replace(/^(地球磁层|极光可见度|低轨卫星阻力|通信与网络|微型电子设备)：/gm, '<strong>$1：</strong>');
+                
+                // 突出底部的综合指数，拉开视觉层次
+                formattedText = formattedText.replace(
+                    /(综合太阳风暴指数：\s*)(\d+)/, 
+                    '<br><br><strong style="font-size: 1.15rem; color: var(--fg); border-top: 1px solid var(--border); padding-top: 12px; display: inline-block;">$1 $2 / 10</strong>'
+                );
+                
+                aiContentEl.innerHTML = formattedText;
+            } else {
+                aiContentEl.innerHTML = 'GLM 大模型响应异常。';
+            }
+        } catch (err) {
+            aiContentEl.innerHTML = '推理服务连接超时。';
+        }
       }
     });
   </script>
