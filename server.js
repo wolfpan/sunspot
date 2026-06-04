@@ -39,7 +39,7 @@ const reqHeaders = {
 // 2. 数据抓取模块
 async function fetchNoaaData() {
     try {
-        const response = await axios.get('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', { headers: reqHeaders, timeout: 10000 });
+        const response = await axios.get('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', { headers: reqHeaders, timeout: 60000 });
         const lines = response.data.trim().split('\n');
         let latestLine = '';
         for (let i = lines.length - 1; i >= 0; i--) {
@@ -81,7 +81,7 @@ async function fetchNoaaKpData() {
 
 async function fetchSilsoData() {
     try {
-        const response = await axios.get('https://www.sidc.be/SILSO/DATA/EISN/EISN_current.txt', { timeout: 10000 });
+        const response = await axios.get('https://www.sidc.be/SILSO/DATA/EISN/EISN_current.txt', { timeout: 20000 });
         const lines = response.data.trim().split('\n');
         const latestLine = lines[lines.length - 1].trim().split(/\s+/);
         const timestamp = new Date(`${latestLine[0]}-${latestLine[1]}-${latestLine[2]}T00:00:00Z`).getTime();
@@ -92,7 +92,7 @@ async function fetchSilsoData() {
 
 async function fetchEsaData() {
     try {
-        const response = await axios.get('https://www.sidc.be/products/meu/', { timeout: 10000 });
+        const response = await axios.get('https://www.sidc.be/products/meu/', { timeout: 20000 });
         const match = response.data.match(/10CM(?: SOLAR)? FLUX\s*[:=]\s*(\d+)/i);
         if (match && match[1]) {
             insertMetric.run(Date.now(), 'ESA_SIDC', 'f107_flux', parseInt(match[1]));
@@ -106,7 +106,7 @@ async function fetchGfzKpData() {
         const now = new Date();
         const endStr = encodeURIComponent(now.toISOString().split('.')[0] + 'Z');
         const startStr = encodeURIComponent(new Date(now.getTime() - 48 * 3600 * 1000).toISOString().split('.')[0] + 'Z');
-        const response = await axios.get(`https://kp.gfz-potsdam.de/app/json/?start=${startStr}&end=${endStr}&index=Kp`, { timeout: 10000 });
+        const response = await axios.get(`https://kp.gfz-potsdam.de/app/json/?start=${startStr}&end=${endStr}&index=Kp`, { timeout: 20000 });
         const data = response.data;
         let validIndex = data.datetime.length - 1;
         while (validIndex >= 0) {
@@ -138,7 +138,7 @@ async function generateAiAnalysis() {
         });
 
         const response = await axios.post('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
-            model: "glm-4-flash",
+            model: "glm-4.7",
             messages: [
                 {
                     role: "system", 
@@ -153,7 +153,7 @@ async function generateAiAnalysis() {
                     content: `当前观测：太阳黑子数=${ssn}，F10.7射电流量=${f107}，地磁Kp指数=${kp.toFixed(2)}。生成极简态势感知。`
                 }
             ]
-        }, { headers: { 'Authorization': `Bearer ${GLM_API_KEY}`, 'Content-Type': 'application/json' }, timeout: 15000 });
+        }, { headers: { 'Authorization': `Bearer ${GLM_API_KEY}`, 'Content-Type': 'application/json' }, timeout: 120000 });
 
         globalAiAnalysisCache = response.data.choices[0].message.content;
         console.log('[Sync] AI Analysis generated and cached in memory.');
