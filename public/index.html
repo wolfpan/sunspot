@@ -79,7 +79,7 @@
     td.date { color: var(--gray); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.85rem; }
     .empty-cell { color: var(--border); font-weight: 300; }
 
-    /* AI 态势分析区样式 */
+    /* AI 态势感知区样式 */
     .ai-analysis {
       margin-top: 40px;
       padding: 24px 24px 24px 20px;
@@ -98,13 +98,13 @@
     .ai-analysis h3::before { content: '✦'; margin-right: 8px; font-size: 1.1rem; }
     
     .ai-content {
-      font-size: 0.95rem; /* 强制统一全局字号 */
+      font-size: 0.95rem;
       color: var(--gray);
       line-height: 1.8;
       white-space: pre-wrap; 
     }
     .ai-content strong { 
-      font-weight: 500; /* 使用中等字重，拒绝粗暴的黑体 */
+      font-weight: 500; 
       color: var(--fg); 
     }
 
@@ -127,7 +127,7 @@
   <div class="container">
     <header>
       <h1>太阳黑子多源聚合</h1>
-      <div id="system-status" class="status yellow">Connecting...</div>
+      <div id="solar-index-top" class="status" style="display: none;"></div>
     </header>
     
     <main>
@@ -168,7 +168,7 @@
           <h4>F10.7 厘米射电流量 (Solar Radio Flux)</h4>
           <p>衡量太阳高层大气整体活跃度的硬指标，由 ESA/SIDC 等机构高频监测。它与黑子数高度正相关，是几乎所有近地卫星“轨道衰变模型”的核心输入参数。</p>
           <ul>
-            <li><span class="range">< 100</span> <b>太阳平静</b>：卫星运行阻力小，轨道寿命长。</li>
+            <li><span class="range">&lt; 100</span> <b>太阳平静</b>：卫星运行阻力小，轨道寿命长。</li>
             <li><span class="range">100 - 150</span> <b>中等活跃</b>：紫外线辐射增强，地球高层大气受热膨胀。</li>
             <li><span class="range">> 150</span> <b>高度活跃</b>：低轨卫星面临极大的大气阻力，需要频繁消耗燃料抬升轨道。</li>
           </ul>
@@ -192,16 +192,16 @@
           <p>全球最主要的空间天气预报中心（SWPC），提供综合性的太阳射电流量、黑子数及地磁观测的实时预警数据。</p>
         </div>
         <div class="term-block">
-          <h4>SILSO (世界黑子数据中心)</h4>
-          <p>位于比利时皇家天文台，是国际公认的太阳黑子数（Sunspot Number）基准维护与发布机构，负责整合全球天文台的观测网络。</p>
-        </div>
-        <div class="term-block">
           <h4>ESA_SIDC (欧洲空间局太阳天气服务中心)</h4>
           <p>依托于比利时天文台运行，发布权威的每日 URSIGRAM 空间天气公报，是欧洲空间局各项近地轨道卫星任务的重要数据基准。</p>
         </div>
         <div class="term-block">
           <h4>GFZ_POTSDAM (德国地学研究中心)</h4>
           <p>由国际地磁学与高空物理学协会（IAGA）官方授权，是全球地磁 Kp 指数的唯一核心计算与发布中心，汇聚全球南北半球的测站网络。</p>
+        </div>
+        <div class="term-block">
+          <h4>SILSO (世界黑子数据中心)</h4>
+          <p>位于比利时皇家天文台，是国际公认的太阳黑子数（Sunspot Number）基准维护与发布机构，负责整合全球天文台的观测网络。</p>
         </div>
       </section>
 
@@ -222,6 +222,10 @@
         </div>
       </section>
     </main>
+
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: center;">
+      <div id="system-status" class="status yellow">Connecting...</div>
+    </footer>
   </div>
   
   <script>
@@ -229,6 +233,7 @@
       const tbody = document.getElementById('data-body');
       const statusEl = document.getElementById('system-status'); 
       const aiContentEl = document.getElementById('ai-content');
+      const solarIndexTopEl = document.getElementById('solar-index-top');
       
       const expectedMetricsCount = 6;
 
@@ -301,7 +306,6 @@
         aiContentEl.innerHTML = '本地服务掉线，无法请求模型推理。';
       }
 
-      // 拉取 AI 推理结果的专用函数
       // 拉取 AI 推理结果的专用函数 (加入防假死轮询机制)
       async function fetchAiAnalysis() {
         try {
@@ -318,17 +322,26 @@
                     return; // 退出当前循环，等待下次查询
                 }
                 
-                // 捕获换行标题并加中等字重
+                // 正则捕获并将“综合太阳风暴指数”精准注入到顶部右侧的独立容器中
+                formattedText = formattedText.replace(/(综合太阳风暴指数：\s*)(\d+)/, (match, prefix, numStr) => {
+                    const num = parseInt(numStr, 10);
+                    let colorClass = 'green'; // 1-4分为绿色
+                    if (num >= 5 && num <= 8) colorClass = 'yellow'; // 5-8分为黄色
+                    if (num >= 9) colorClass = 'red'; // 9分以上为红色
+                    
+                    if (solarIndexTopEl) {
+                        solarIndexTopEl.className = `status ${colorClass}`;
+                        solarIndexTopEl.textContent = `${prefix.trim()} ${num} / 10`;
+                        solarIndexTopEl.style.display = 'flex'; // 激活并渲染显示
+                    }
+                    return ''; // 将其从 AI 报告区块的原本尾部位置抹除
+                });
+
                 // 捕获极简版的两行核心标题并加中等字重
                 formattedText = formattedText.replace(/^(观测现象|环境影响)：/gm, '<strong>$1：</strong>');
                 
-                // 用虚线块将综合指数包裹起来，视觉上彻底独立
-                formattedText = formattedText.replace(
-                    /(综合太阳风暴指数：\s*)(\d+)/, 
-                    '<div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);"><strong>$1 $2 / 10</strong></div>'
-                );
-                
-                aiContentEl.innerHTML = formattedText;
+                // 组合并渲染剩余的态势感知报告文字
+                aiContentEl.innerHTML = formattedText.trim();
             } else {
                 aiContentEl.innerHTML = '获取态势感知数据失败。';
             }
