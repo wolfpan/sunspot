@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>太阳黑子多源聚合</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #111111;
+      --gray: #666666;
+      --light-gray: #a0a0a0;
+      --border: #eaeaea;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      margin: 0;
+      padding: 60px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px; /* 加宽容器以容纳更多列 */
+    }
+    header {
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    .status {
+      font-size: 0.85rem;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+    }
+    .status::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .status.green::before { background-color: #28a745; box-shadow: 0 0 4px rgba(40,167,69,0.4); }
+    .status.yellow::before { background-color: #ffc107; box-shadow: 0 0 4px rgba(255,193,7,0.4); }
+    .status.red::before { background-color: #dc3545; box-shadow: 0 0 4px rgba(220,53,69,0.4); }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 16px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-weight: 500;
+      color: var(--gray);
+      font-size: 0.85rem;
+    }
+    /* 第一列机构靠左，最后一列日期靠右，中间数值居中 */
+    th:first-child, td:first-child { text-align: left; padding-left: 0; }
+    th:last-child, td:last-child { text-align: right; padding-right: 0; }
+    th.center, td.center { text-align: center; }
+    
+    td.agency { font-weight: 600; }
+    td.value {
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 1.1rem;
+    }
+    td.date {
+      color: var(--gray);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.85rem;
+    }
+    .empty-cell {
+      color: var(--border);
+      font-weight: 300;
+    }
+
+    /* 科普区样式 */
+    .glossary {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px dashed var(--border);
+    }
+    .glossary h3 {
+      font-size: 0.95rem;
+      color: var(--gray);
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .term-block { margin-bottom: 30px; }
+    .term-block h4 { font-size: 1rem; margin: 0 0 8px 0; color: var(--fg); }
+    .term-block p { font-size: 0.9rem; color: var(--gray); margin: 0 0 12px 0; }
+    .term-block ul { margin: 0; padding-left: 0; list-style: none; }
+    .term-block li {
+      font-size: 0.85rem;
+      color: var(--fg);
+      margin-bottom: 6px;
+      padding-left: 12px;
+      border-left: 2px solid var(--border);
+    }
+    .term-block .range {
+      display: inline-block;
+      width: 70px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: var(--gray);
+    }
+    /* 代码块与行内代码样式 */
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      background-color: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    pre {
+      background-color: #fcfcfc;
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      color: var(--gray);
+      line-height: 1.4;
+      margin-top: 16px;
+    }
+    pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>太阳黑子多源聚合</h1>
+      <div id="system-status" class="status yellow">Connecting...</div>
+    </header>
+    
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 20%;">机构</th>
+            <th class="center" style="width: 20%;">太阳黑子数 (SSN)</th>
+            <th class="center" style="width: 20%;">F10.7 射电流量</th>
+            <th class="center" style="width: 20%;">地磁 Kp 指数</th>
+            <th style="width: 20%;">记录日期</th>
+          </tr>
+        </thead>
+        <tbody id="data-body">
+          <tr><td colspan="5" style="text-align: left; color: var(--gray);">拉取数据中...</td></tr>
+        </tbody>
+      </table>
+
+      <section class="glossary">
+        <h3>观测指标与影响范围基准</h3>
+        
+        <div class="term-block">
+          <h4>太阳黑子数 (SSN: Sunspot Number)</h4>
+          <p>反映太阳表面磁场活跃程度的核心“源头”指标。数值越高，引发耀斑和日冕物质抛射（CME）的概率越大。</p>
+          <ul>
+            <li><span class="range">0 - 50</span> <b>平静/极小期</b>：空间天气稳定。</li>
+            <li><span class="range">51 - 150</span> <b>活跃期</b>：处于正常太阳活动高峰区间，高频无线电偶有干扰。</li>
+            <li><span class="range">> 150</span> <b>极度活跃</b>：高能粒子爆发频次剧增，极易引发空间天气灾害。</li>
+          </ul>
+        </div>
+
+        <div class="term-block">
+          <h4>F10.7 厘米射电流量 (Solar Radio Flux)</h4>
+          <p>衡量太阳高层大气整体活跃度的硬指标，由 ESA/SIDC 等机构高频监测。它与黑子数高度正相关，是几乎所有近地卫星“轨道衰变模型”的核心输入参数。</p>
+          <ul>
+            <li><span class="range">< 100</span> <b>太阳平静</b>：卫星运行阻力小，轨道寿命长。</li>
+            <li><span class="range">100 - 150</span> <b>中等活跃</b>：紫外线辐射增强，地球高层大气受热膨胀。</li>
+            <li><span class="range">> 150</span> <b>高度活跃</b>：低轨卫星（如星链、空间站）面临极大的大气阻力，需要频繁消耗燃料抬升轨道。</li>
+          </ul>
+        </div>
+
+        <div class="term-block">
+          <h4>地磁 Kp 指数 (Geomagnetic Kp Index)</h4>
+          <p>衡量太阳高能粒子流对地球磁场造成实际“物理冲击”的量化指标，范围 0 - 9，呈对数级增长。</p>
+          <ul>
+            <li><span class="range">Kp 0 - 4</span> <b>平静到微扰</b>：对地球基建无实质物理影响（绝大部分时间的常态）。</li>
+            <li><span class="range">Kp 5 - 6</span> <b>中等磁暴</b>：高纬度地区电网可能出现轻微电压波动，极光可见范围扩张。</li>
+            <li><span class="range">Kp 7 - 8</span> <b>强烈磁暴</b>：卫星导航误差显著增大，长距离输电线产生地磁诱导电流（GIC）。</li>
+            <li><span class="range">Kp 9</span> <b>极强磁暴</b>：可能导致电网保护装置误动大面积停电，全球短波通信长时间中断。</li>
+          </ul>
+        </div>
+      </section>
+      <section class="glossary">
+        <h3>数据来源机构说明</h3>
+        
+        <div class="term-block">
+          <h4>NOAA (美国国家海洋和大气管理局)</h4>
+          <p>全球最主要的空间天气预报中心（SWPC），提供综合性的太阳射电流量、黑子数及地磁观测的实时预警数据。</p>
+        </div>
+        
+        <div class="term-block">
+          <h4>SILSO (世界黑子数据中心)</h4>
+          <p>位于比利时皇家天文台，是国际公认的太阳黑子数（Sunspot Number）基准维护与发布机构，负责整合全球天文台的观测网络。</p>
+        </div>
+        
+        <div class="term-block">
+          <h4>ESA_SIDC (欧洲空间局太阳天气服务中心)</h4>
+          <p>依托于比利时天文台运行，发布权威的每日 URSIGRAM 空间天气公报，是欧洲空间局各项近地轨道卫星任务的重要数据基准。</p>
+        </div>
+        
+        <div class="term-block">
+          <h4>GFZ_POTSDAM (德国地学研究中心)</h4>
+          <p>由国际地磁学与高空物理学协会（IAGA）官方授权，是全球地磁 Kp 指数的唯一核心计算与发布中心，汇聚全球南北半球的测站网络。</p>
+        </div>
+      </section>
+
+      <section class="glossary">
+        <h3>开发者 API 接入</h3>
+        
+        <div class="term-block">
+          <p>本系统提供极简的 RESTful API，供第三方看板、自动化脚本或物联网设备直接调用最新聚合数据。</p>
+          <ul>
+            <li><strong>请求节点:</strong> <code>GET /api/v1/solar/sunspots</code></li>
+            <li><strong>数据格式:</strong> <code>application/json</code></li>
+            <li><strong>跨域支持:</strong> 默认允许同源，可根据需求在服务端配置 CORS。</li>
+          </ul>
+          
+          <pre><code>// 成功响应示例
+{
+  "status": "success",
+  "update_time": "2026-06-04T10:00:00.000Z",
+  "data": [
+    {
+      "agency": "NOAA",
+      "metric": "kp_index",
+      "value": 2.33,
+      "record_time": "2026-06-04T00:00:00.000Z"
+    },
+    // ... 包含所有机构最新指标的数组
+  ]
+}</code></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+      const tbody = document.getElementById('data-body');
+      const statusEl = document.getElementById('system-status'); 
+
+// 预期获得的总数据指标数量 (NOAA有3个, SILSO 1个, ESA 1个, GFZ 1个，共6个)
+      const expectedMetricsCount = 6;
+
+      try {
+        const response = await fetch('/api/v1/solar/sunspots');
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.data.length > 0) {
+          tbody.innerHTML = ''; 
+          
+          // 状态灯判断逻辑
+          if (result.data.length >= expectedMetricsCount) {
+            statusEl.className = 'status green';
+            statusEl.textContent = 'System Online';
+          } else {
+            statusEl.className = 'status yellow';
+            statusEl.textContent = `Partial Data (${result.data.length}/${expectedMetricsCount})`;
+          }
+          
+          // --- 核心改动：按“机构”进行数据透视 (Data Pivoting) ---
+          const pivotData = {};
+          
+          result.data.forEach(item => {
+            if (!pivotData[item.agency]) {
+                pivotData[item.agency] = {
+                    agency: item.agency,
+                    ssn: '<span class="empty-cell">—</span>',
+                    f107: '<span class="empty-cell">—</span>',
+                    kp: '<span class="empty-cell">—</span>',
+                    date: ''
+                };
+            }
+            
+            const dateObj = new Date(item.record_time);
+            pivotData[item.agency].date = dateObj.toISOString().split('T')[0];
+
+            if (item.metric === 'sunspot_number') pivotData[item.agency].ssn = item.value;
+            if (item.metric === 'f107_flux') pivotData[item.agency].f107 = item.value;
+            
+            // 核心修复：强制格式化 Kp 指数。GFZ 规范为 3 位小数，NOAA 规范为 2 位小数
+            if (item.metric === 'kp_index') {
+                const decimals = item.agency === 'GFZ_POTSDAM' ? 3 : 2;
+                pivotData[item.agency].kp = Number(item.value).toFixed(decimals);
+            }
+          });
+
+          // 遍历透视后的对象，生成 HTML 表格行
+          Object.values(pivotData).forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="agency">${row.agency}</td>
+              <td class="value center">${row.ssn}</td>
+              <td class="value center">${row.f107}</td>
+              <td class="value center">${row.kp}</td>
+              <td class="date">${row.date}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+        } else {
+          statusEl.className = 'status red';
+          statusEl.textContent = 'No Data';
+          tbody.innerHTML = '<tr><td colspan="5">暂无数据记录，请等待服务器抓取。</td></tr>';
+        }
+      } catch (error) {
+        statusEl.className = 'status red';
+        statusEl.textContent = 'System Offline';
+        tbody.innerHTML = '<tr><td colspan="5">API 连接异常。</td></tr>';
+      }
+    });
+  </script>
+</body>
+</html>
