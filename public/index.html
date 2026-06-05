@@ -278,7 +278,13 @@
             }
           });
 
-          Object.values(pivotData).forEach(row => {
+          // 将 pivotData 的值转为数组，并根据日期进行降序排序（最新的排前面）
+          const sortedData = Object.values(pivotData).sort((a, b) => {
+              return new Date(b.date) - new Date(a.date);
+          });
+
+          // 遍历已排序的数据并渲染到表格中
+          sortedData.forEach(row => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td class="agency">${row.agency}</td>
