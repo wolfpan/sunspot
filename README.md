@@ -38,9 +38,10 @@
 **1. 克隆项目与安装依赖**
 
 ```bash
-git clone [<repository-url>](https://github.com/wolfpan/sunspot.git)
+git clone https://github.com/wolfpan/sunspot.git
 cd sunspot
 npm install express better-sqlite3 node-cron axios
+npm init -y
 
 ```
 
